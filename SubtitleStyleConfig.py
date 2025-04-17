@@ -1,0 +1,30 @@
+class SubtitleStyleConfig:
+    def __init__(self,
+                 words_per_line=1,
+                 font="Grobold",
+                 font_size=190,                         # Optimale Größe für TikTok
+                 primary_color="&H00FFFFFF",            # Weiß
+                 outline_color="&H00000000",            # Schwarz als Outline
+                 outline_width=2,                       # Dünne, saubere Outline
+                 shadow=5,                              # Sichtbarer Schatten nach rechts unten
+                 shadow_blur=0,                         # Kein Glow
+                 alignment=5,                           # Mittig zentriert
+                 margin_v=30,
+                 word_spacing=10,
+                 letter_spacing=1,
+                 fade_duration=(0, 0),
+                 effect=None):                          # Optional: \move etc.
+        self.words_per_line = words_per_line
+        self.font = font
+        self.font_size = font_size
+        self.primary_color = primary_color
+        self.outline_color = outline_color
+        self.outline_width = outline_width
+        self.shadow = shadow
+        self.shadow_blur = shadow_blur
+        self.alignment = alignment
+        self.margin_v = margin_v
+        self.word_spacing = word_spacing
+        self.letter_spacing = letter_spacing
+        self.fade_duration = fade_duration
+        self.effect = effect
