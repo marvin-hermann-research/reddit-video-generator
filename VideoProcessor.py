@@ -95,32 +95,88 @@ class VideoProcessor:
         except subprocess.CalledProcessError as e:
             logging.error(f"❌ Fehler beim Hinzufügen der Untertitel: {e}")
 
+    def shift_ass_timings(self, ass_path: str, offset_seconds: float):
+        def shift_timestamp(timestamp: str) -> str:
+            h, m, s_ms = timestamp.split(":")
+            s, ms = s_ms.split(".")
+            total_ms = (int(h) * 3600 + int(m) * 60 + int(s)) * 100 + int(ms)
+            total_ms += int(offset_seconds * 100)
 
-    def generateVideoShort(self, audio_filename: str, add_subs: bool = True):
-        audio_path = os.path.join(self.audio_folder, audio_filename)
-        base_name = Path(audio_filename).stem
+            new_h = total_ms // (3600 * 100)
+            new_m = (total_ms % (3600 * 100)) // (60 * 100)
+            new_s = (total_ms % (60 * 100)) // 100
+            new_ms = total_ms % 100
+
+            return f"{new_h:01}:{new_m:02}:{new_s:02}.{new_ms:02}"
+
+        with open(ass_path, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+
+        new_lines = []
+        for line in lines:
+            if line.startswith("Dialogue:"):
+                parts = line.split(",", 3)
+                start_time = parts[1]
+                end_time = parts[2]
+                shifted_start = shift_timestamp(start_time)
+                shifted_end = shift_timestamp(end_time)
+                new_line = f"{parts[0]},{shifted_start},{shifted_end},{parts[3]}"
+                new_lines.append(new_line)
+            else:
+                new_lines.append(line)
+
+        with open(ass_path, "w", encoding="utf-8") as f:
+            f.writelines(new_lines)
+
+
+
+    def generateVideoShort(self, audio_filenames: list, add_subs: bool = True):
+        title_audio_path = os.path.join(self.audio_folder, audio_filenames[0])  # title.mp3
+        post_audio_path = os.path.join(self.audio_folder, audio_filenames[1])    # post.mp3
+        base_name = "_".join([Path(filename).stem for filename in audio_filenames])
 
         # Pfade
         cut_video_path = os.path.join(self.temp_folder, "cut_bg.mp4")
         no_audio_path = os.path.join(self.temp_folder, "no_audio.mp4")
         merged_path = os.path.join(self.temp_folder, "merged.mp4")
         final_output_path = os.path.join(self.output_folder, f"{base_name}_short.mp4")
-        ass_path = os.path.join(self.subtitle_folder, f"{base_name}.ass")
+        ass_path = os.path.join(self.subtitle_folder, "post.ass")
 
-        # Audio-Länge
-        audio_duration = self.get_audio_duration(audio_path)
+        # Längen der Audiodateien
+        title_audio_duration = self.get_audio_duration(title_audio_path)
+        post_audio_duration = self.get_audio_duration(post_audio_path)
+
+        # Gesamtvideo-Dauer = Länge der beiden Audiodateien zusammen
+        total_duration = title_audio_duration + post_audio_duration
 
         # Hintergrundvideo vorbereiten
         background_video = self.pick_random_background()
         logging.info("✂️  Schneide Hintergrundvideo...")
-        self.cut_background_video(background_video, cut_video_path, duration=audio_duration)
+        self.cut_background_video(background_video, cut_video_path, duration=total_duration)
 
         logging.info("🔇 Entferne Originalton...")
         self.remove_audio(cut_video_path, no_audio_path)
 
-        logging.info("🔊 Füge eigene Audiospur ein...")
-        self.merge_audio_and_video(no_audio_path, audio_path, merged_path)
+        logging.info("🔊 generiere merged audio datei titel + post...")
+        combined_audio_path = os.path.join(self.audio_folder, "combined_audio.mp3")
+        subprocess.run([
+            self.ffmpeg_path,
+            "-i", title_audio_path,
+            "-i", post_audio_path,
+            "-filter_complex", "[0][1]concat=n=2:v=0:a=1[out]",
+            "-map", "[out]",
+            "-y", combined_audio_path
+        ], check=True)
+
+        logging.info("🔊 Füge Merged-Audio ein...")
+        self.merge_audio_and_video(no_audio_path, combined_audio_path, merged_path)
+
+        #shifting ass datei damit untertitel passenden Startzeitpunkt haben
+        self.shift_ass_timings(ass_path, offset_seconds=title_audio_duration)
 
         logging.info("💬 Füge .ass Untertitel hinzu...")
-        self.add_subtitles(merged_path, ass_path, audio_path, final_output_path) #TODO diese methoden nutzung muss noch geschehen
+        self.add_subtitles(merged_path, ass_path, post_audio_path, final_output_path)
+
+        logging.info("✅ Video wurde erfolgreich erstellt!")
+
 

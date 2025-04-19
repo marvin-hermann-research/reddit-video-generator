@@ -102,15 +102,15 @@ class SubtitleGenerator:
         cs = int((s - int(s)) * 100)
         return f"{int(h)}:{int(m):02}:{int(s):02}.{cs:02}"
 
-    def generate_subtitles(self, audio_filename):
-        audio_path = os.path.join(self.input_folder, audio_filename)
+    def generate_subtitles(self):
+        audio_path = os.path.join(self.input_folder, "post.mp3")
 
         if not os.path.exists(audio_path):
-            raise FileNotFoundError(f"{audio_filename} wurde nicht gefunden!")
+            raise FileNotFoundError(f"post.mp3 wurde nicht gefunden!")
 
         segments = self.transcribe_with_timestamps(audio_path)
 
-        base_name = os.path.splitext(audio_filename)[0]
+        base_name = os.path.splitext("post.mp3")[0]
         srt_path = os.path.join(self.output_folder, base_name + ".srt")
         ass_path = os.path.join(self.output_folder, base_name + ".ass")
 

@@ -28,21 +28,21 @@ class MainController:
             self.website_interactor.interact(prompt)
             print(f"[INFO] Audio generation completed.")
 
-            # Extrahiere Dateinamen-sicheren Titel
-            prompt_tail = post["title"].strip()
-            safe_name = re.sub(r'[\\/*?:"<>|]', '', prompt_tail).replace(" ", "_")
-            safe_name = unicodedata.normalize('NFKD', safe_name).encode('ASCII', 'ignore').decode()
-            mp3_filename = f"{safe_name}.mp3"
+            mp3_filename = f"" #TODO dummy entfernen
+
+            # generiere untertitel für die audio datei des posts NICHT TITEL
 
             try:
-                self.subtitle_generator.generate_subtitles(mp3_filename)
+                self.subtitle_generator.generate_subtitles()
             except FileNotFoundError:
-                print(f"[WARNUNG] Es konnten keine Untertitel für die Datei {mp3_filename} erstellt werden und daher übersprungen.")
+                print(f"[WARNUNG] Es konnten keine Untertitel für den Post erstellt werden und daher übersprungen.")
                 continue
 
+            # generiere das video mit der Titel und post audio und den post subtitle
+
             try:
-                print(f"[INFO] Starte Videoerstellung für: {mp3_filename}")
-                self.video_processor.generateVideoShort(mp3_filename)
+                print(f"[INFO] Starte Videoerstellung für den Post")
+                self.video_processor.generateVideoShort(["title.mp3", "post.mp3"])
                 print(f"[INFO] Video fertig geschnitten")
             except Exception as e:
                 print(f"[FEHLER] Bei der Videoerstellung ist ein Fehler aufgetreten: {e}")
