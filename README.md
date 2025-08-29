@@ -31,10 +31,10 @@ It scrapes multiple subreddits, converts posts to TTS audio, generates subtitles
 <p align="center">
   <img width="500" height="794" alt="image" src="https://github.com/user-attachments/assets/9ae3c92c-fcd1-4c1b-978b-77b366a98a03" />
   <img width="500" height="794" alt="image" src="https://github.com/user-attachments/assets/10137275-8d87-4859-a6d9-b7969045e4c1" />
+   <img width="300" height="156" alt="image" src="https://github.com/user-attachments/assets/37e944c6-add7-4ae5-9aea-b9d18e8b8f54" />
 </p>
 <p align="center">
-  <img width="300" height="156" alt="image" src="https://github.com/user-attachments/assets/37e944c6-add7-4ae5-9aea-b9d18e8b8f54" />
-  <img src="example.gif" alt="Generated Video Example" width="400"/>
+  <img src="example.gif" alt="Generated Video Example" width="300"/>
 </p>
 
 ---
