@@ -5,11 +5,11 @@ class PostGrabber:
     def __init__(self):
         # PRAW Setup
         self.reddit = praw.Reddit(
-            client_id="uoLVZTiIA8t1q1iHRLDeYg",
-            client_secret="Zg5uoJA5llNeoLaE-esNiE3QpObdMQ",
-            password="Dandschen!?529",
-            user_agent="PostExtractor by /u/Distinct-Respect-274",
-            username="Distinct-Respect-274",
+            client_id="YOUR ID",
+            client_secret="YOUR SECRET",
+            password="YOUR PASSWORD",
+            user_agent="YPOUR AGENT",
+            username="YOUR USERNAME",
         )
 
         # Instanziiere den ContentFilter
