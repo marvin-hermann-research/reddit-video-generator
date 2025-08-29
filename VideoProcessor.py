@@ -79,21 +79,38 @@ class VideoProcessor:
             output_path
         ])
 
-    def add_subtitles(self, input_video: str, ass_path: str, audio_path: str, output_path: str):
+    def add_subtitles(self, input_video: str, ass_path: str, audio_path: str, output_path: str, title_audio_duration: float):
         try:
             ass_path_ffmpeg = Path(ass_path).as_posix().replace(":", "\\:")
             ass_path_quoted = f"'{ass_path_ffmpeg}'"
-            logging.info(f"✅ Füge Untertitel hinzu mit Pfad: {ass_path_quoted}")
+
+            # drawbox Filter: mittig, 40% der Breite, 20% der Höhe, voll deckend
+            drawbox_filter = (
+                "drawbox="
+                "x=(iw-w)/2:"
+                "y=(ih-h)/2:"
+                "w=iw*0.4:"
+                "h=ih*0.2:"
+                f"color=white@1.0:t=fill:"
+                f"enable='between(t,0,{title_audio_duration})'"
+            )
+
+            # combine drawbox und ass
+            combined_filter = f"{drawbox_filter},ass={ass_path_quoted}"
+
+            logging.info("🎞️ Füge Untertitel + weißen Kasten hinzu...")
             subprocess.run([
                 self.ffmpeg_path,
                 "-i", input_video,
-                "-vf", f"ass={ass_path_quoted}",
+                "-vf", combined_filter,
                 "-c:a", "copy",
                 output_path
             ], check=True)
-            logging.info("✅ Untertitel erfolgreich hinzugefügt.")
+
+            logging.info("✅ Untertitel + Rechteck erfolgreich eingefügt.")
         except subprocess.CalledProcessError as e:
-            logging.error(f"❌ Fehler beim Hinzufügen der Untertitel: {e}")
+            logging.error(f"❌ Fehler beim Einfügen: {e}")
+
 
     def shift_ass_timings(self, ass_path: str, offset_seconds: float):
         def shift_timestamp(timestamp: str) -> str:
@@ -175,8 +192,7 @@ class VideoProcessor:
         self.shift_ass_timings(ass_path, offset_seconds=title_audio_duration)
 
         logging.info("💬 Füge .ass Untertitel hinzu...")
-        self.add_subtitles(merged_path, ass_path, post_audio_path, final_output_path)
+        self.add_subtitles(merged_path, ass_path, post_audio_path, final_output_path, title_audio_duration)
+
 
         logging.info("✅ Video wurde erfolgreich erstellt!")
-
-
