@@ -29,7 +29,7 @@ class SubtitleGenerator:
     def transcribe_with_timestamps(self, audio_path):
         model = whisper.load_model("base")
         try:
-            result = model.transcribe(audio_path, word_timestamps=True, task="transcribe")  # ✅ geändert
+            result = model.transcribe(audio_path, word_timestamps=True, task="transcribe")
             return result['segments']
         except Exception as e:
             print(f"[ERROR] Während der Transkription trat ein Fehler auf: {e}")
@@ -62,7 +62,7 @@ class SubtitleGenerator:
             f.write("Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n")
 
             for seg in segments:
-                word_objs = seg.get("words", [])  # ✅ echte Wortobjekte
+                word_objs = seg.get("words", [])
 
                 if not word_objs:
                     continue  # falls keine Wörter enthalten sind
